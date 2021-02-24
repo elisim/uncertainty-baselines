@@ -28,6 +28,7 @@ from absl import flags
 from absl import logging
 
 import numpy as np
+import robustness_metrics as rm
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import uncertainty_baselines as ub
@@ -271,7 +272,7 @@ def main(argv):
       'test/negative_log_likelihood': tf.keras.metrics.Mean(),
       'test/gibbs_cross_entropy': tf.keras.metrics.Mean(),
       'test/accuracy': tf.keras.metrics.SparseCategoricalAccuracy(),
-      'test/ece': um.ExpectedCalibrationError(num_bins=FLAGS.num_bins),
+      'test/ece': rm.metrics.get('ece', num_bins=FLAGS.num_bins),
   }
   metrics.update(val_metrics)
   corrupt_metrics = {}
@@ -280,7 +281,7 @@ def main(argv):
     corrupt_metrics['test/accuracy_{}'.format(name)] = (
         tf.keras.metrics.SparseCategoricalAccuracy())
     corrupt_metrics['test/ece_{}'.format(name)] = (
-        um.ExpectedCalibrationError(num_bins=FLAGS.num_bins))
+        rm.metrics.get('ece', num_bins=FLAGS.num_bins))
   for i in range(len(unique_selected_members)):
     metrics['test/nll_member_{}'.format(i)] = tf.keras.metrics.Mean()
     metrics['test/accuracy_member_{}'.format(i)] = (

@@ -20,11 +20,10 @@ import time
 from absl import app
 from absl import flags
 from absl import logging
-
+import robustness_metrics as rm
 import tensorflow as tf
 import uncertainty_baselines as ub
 import bert_utils  # local file import
-import uncertainty_metrics as um
 
 # Data flags
 flags.DEFINE_string(
@@ -221,11 +220,11 @@ def main(argv):
         'train/negative_log_likelihood': tf.keras.metrics.Mean(),
         'train/accuracy': tf.keras.metrics.SparseCategoricalAccuracy(),
         'train/loss': tf.keras.metrics.Mean(),
-        'train/ece': um.ExpectedCalibrationError(
+        'train/ece': rm.metrics.get('ece', 
             num_bins=FLAGS.num_bins),
         'test/negative_log_likelihood': tf.keras.metrics.Mean(),
         'test/accuracy': tf.keras.metrics.SparseCategoricalAccuracy(),
-        'test/ece': um.ExpectedCalibrationError(
+        'test/ece': rm.metrics.get('ece', 
             num_bins=FLAGS.num_bins),
     }
 
@@ -237,7 +236,7 @@ def main(argv):
             'test/accuracy_{}'.format(dataset_name):
                 tf.keras.metrics.SparseCategoricalAccuracy(),
             'test/ece_{}'.format(dataset_name):
-                um.ExpectedCalibrationError(num_bins=FLAGS.num_bins)
+                rm.metrics.get('ece', num_bins=FLAGS.num_bins)
         })
 
     checkpoint = tf.train.Checkpoint(model=model, optimizer=optimizer)
